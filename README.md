@@ -1,4 +1,10 @@
-# application-images
+# Spark Docker Images
+
+This is a derivative work from two projects:
+* https://github.com/kubernetes-incubator/application-images.git
+* https://github.com/kubernetes/examples.git
+
+But trying to use a more update versions of Spark and Zeppelin.
 
 This repository houses the Docker image build contents for (some) applications
 that run on Kubernetes. Specifically, it houses the build content and rules for
