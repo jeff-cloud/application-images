@@ -15,13 +15,17 @@
 # This image relies on the zeppelin-build image to get the zeppelin
 # binaries built, and the Makefile to put it in this directory.
 
-FROM gcr.io/google_containers/spark-base:latest
+FROM databeanau/spark-base:latest
 
-ENV ZEPPELIN_VER  0.5.6-incubating
+ENV ZEPPELIN_VER  0.7.2
+
+# http://archive.apache.org/dist/incubator/zeppelin/0.5.6-incubating/zeppelin-0.5.6-incubating-bin-all.tgz
+# http://www.apache.org/dyn/closer.cgi/zeppelin/zeppelin-0.7.2/zeppelin-0.7.2-bin-all.tgz
+# http://mirror.ventraip.net.au/apache/zeppelin/zeppelin-0.7.2/zeppelin-0.7.2-bin-all.tgz
 
 RUN mkdir -p /opt && \
     cd /opt && \
-    curl http://www.us.apache.org/dist/incubator/zeppelin/${ZEPPELIN_VER}/zeppelin-${ZEPPELIN_VER}-bin-all.tgz | \
+    curl http://mirror.ventraip.net.au/apache/zeppelin/zeppelin-${ZEPPELIN_VER}/zeppelin-${ZEPPELIN_VER}-bin-all.tgz | \
         tar -zx && \
     ln -s zeppelin-${ZEPPELIN_VER}-bin-all zeppelin && \
     echo Zeppelin ${ZEPPELIN_VER} installed in /opt

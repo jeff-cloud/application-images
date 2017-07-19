@@ -1,7 +1,7 @@
 FROM java:openjdk-8-jdk
 
 ENV hadoop_ver 2.6.1
-ENV spark_ver 1.5.2
+ENV spark_ver 2.1.1
 
 # Get Hadoop from US Apache mirror and extract just the native
 # libs. (Until we care about running HDFS with these containers, this
@@ -16,9 +16,10 @@ RUN mkdir -p /opt && \
 # Get Spark from US Apache mirror.
 RUN mkdir -p /opt && \
     cd /opt && \
-    curl http://www.us.apache.org/dist/spark/spark-${spark_ver}/spark-${spark_ver}-bin-hadoop2.6.tgz | \
+    curl https://d3kbcqa49mib13.cloudfront.net/spark-${spark_ver}-bin-hadoop2.6.tgz | \
         tar -zx && \
     ln -s spark-${spark_ver}-bin-hadoop2.6 spark && \
+    mkdir -p spark/lib && \
     echo Spark ${spark_ver} installed in /opt
 
 # Add the GCS connector.
