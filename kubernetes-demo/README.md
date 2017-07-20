@@ -34,26 +34,26 @@ Optionally, your Kubernetes cluster should be configured with a Loadbalancer int
 ## Step One: Create namespace
 
 ```sh
-$ kubectl create -f examples/spark/namespace-spark-cluster.yaml
+$ kubectl create -f namespace-spark-cluster.yaml
 ```
 
 Now list all namespaces:
 
 ```sh
 $ kubectl get namespaces
-NAME          LABELS             STATUS
-default       <none>             Active
-spark-cluster name=spark-cluster Active
+NAME            STATUS    AGE
+default         Active    2h
+kube-public     Active    2h
+kube-system     Active    2h
+spark-cluster   Active    9s
 ```
 
 To configure kubectl to work with our namespace, we will create a new context using our current context as a base:
 
 ```sh
-$ CURRENT_CONTEXT=$(kubectl config view -o jsonpath='{.current-context}')
-$ USER_NAME=$(kubectl config view -o jsonpath='{.contexts[?(@.name == "'"${CURRENT_CONTEXT}"'")].context.user}')
-$ CLUSTER_NAME=$(kubectl config view -o jsonpath='{.contexts[?(@.name == "'"${CURRENT_CONTEXT}"'")].context.cluster}')
-$ kubectl config set-context spark --namespace=spark-cluster --cluster=${CLUSTER_NAME} --user=${USER_NAME}
-$ kubectl config use-context spark
+$ source kube-spark-context-switch.sh
+Context "spark" modified.
+Switched to context "spark".
 ```
 
 ## Step Two: Start your Master service
@@ -68,7 +68,7 @@ file to create a
 running the Spark Master service.
 
 ```console
-$ kubectl create -f examples/spark/spark-master-controller.yaml
+$ kubectl create -f spark-master-controller.yaml
 replicationcontroller "spark-master-controller" created
 ```
 
@@ -78,7 +78,7 @@ create a logical service endpoint that Spark workers can use to access the
 Master pod:
 
 ```console
-$ kubectl create -f examples/spark/spark-master-service.yaml
+$ kubectl create -f spark-master-service.yaml
 service "spark-master" created
 ```
 
@@ -94,24 +94,40 @@ Check logs to see the status of the master. (Use the pod retrieved from the prev
 
 ```sh
 $ kubectl logs spark-master-controller-5u0q5
-starting org.apache.spark.deploy.master.Master, logging to /opt/spark-1.5.1-bin-hadoop2.6/sbin/../logs/spark--org.apache.spark.deploy.master.Master-1-spark-master-controller-g0oao.out
-Spark Command: /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -cp /opt/spark-1.5.1-bin-hadoop2.6/sbin/../conf/:/opt/spark-1.5.1-bin-hadoop2.6/lib/spark-assembly-1.5.1-hadoop2.6.0.jar:/opt/spark-1.5.1-bin-hadoop2.6/lib/datanucleus-rdbms-3.2.9.jar:/opt/spark-1.5.1-bin-hadoop2.6/lib/datanucleus-core-3.2.10.jar:/opt/spark-1.5.1-bin-hadoop2.6/lib/datanucleus-api-jdo-3.2.6.jar -Xms1g -Xmx1g org.apache.spark.deploy.master.Master --ip spark-master --port 7077 --webui-port 8080
-========================================
-15/10/27 21:25:05 INFO Master: Registered signal handlers for [TERM, HUP, INT]
-15/10/27 21:25:05 INFO SecurityManager: Changing view acls to: root
-15/10/27 21:25:05 INFO SecurityManager: Changing modify acls to: root
-15/10/27 21:25:05 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: Set(root); users with modify permissions: Set(root)
-15/10/27 21:25:06 INFO Slf4jLogger: Slf4jLogger started
-15/10/27 21:25:06 INFO Remoting: Starting remoting
-15/10/27 21:25:06 INFO Remoting: Remoting started; listening on addresses :[akka.tcp://sparkMaster@spark-master:7077]
-15/10/27 21:25:06 INFO Utils: Successfully started service 'sparkMaster' on port 7077.
-15/10/27 21:25:07 INFO Master: Starting Spark master at spark://spark-master:7077
-15/10/27 21:25:07 INFO Master: Running Spark version 1.5.1
-15/10/27 21:25:07 INFO Utils: Successfully started service 'MasterUI' on port 8080.
-15/10/27 21:25:07 INFO MasterWebUI: Started MasterWebUI at http://spark-master:8080
-15/10/27 21:25:07 INFO Utils: Successfully started service on port 6066.
-15/10/27 21:25:07 INFO StandaloneRestServer: Started REST server for submitting applications on port 6066
-15/10/27 21:25:07 INFO Master: I have been elected leader! New state: ALIVE
+17/07/20 11:59:34 INFO Master: Started daemon with process name: 11@spark-master-controller-1lth8
+17/07/20 11:59:34 INFO SignalUtils: Registered signal handler for TERM
+17/07/20 11:59:34 INFO SignalUtils: Registered signal handler for HUP
+17/07/20 11:59:34 INFO SignalUtils: Registered signal handler for INT
+17/07/20 11:59:34 INFO SecurityManager: Changing view acls to: root
+17/07/20 11:59:34 INFO SecurityManager: Changing modify acls to: root
+17/07/20 11:59:34 INFO SecurityManager: Changing view acls groups to: 
+17/07/20 11:59:34 INFO SecurityManager: Changing modify acls groups to: 
+17/07/20 11:59:34 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(root); groups with view permissions: Set(); users  with modify permissions: Set(root); groups with modify permissions: Set()
+17/07/20 11:59:35 INFO Utils: Successfully started service 'sparkMaster' on port 7077.
+17/07/20 11:59:35 INFO Master: Starting Spark master at spark://spark-master:7077
+17/07/20 11:59:35 INFO Master: Running Spark version 2.1.1
+17/07/20 11:59:35 INFO log: Logging initialized @1394ms
+17/07/20 11:59:35 INFO Server: jetty-9.2.z-SNAPSHOT
+17/07/20 11:59:35 INFO ContextHandler: Started o.s.j.s.ServletContextHandler@5c5186f1{/app,null,AVAILABLE,@Spark}
+17/07/20 11:59:35 INFO ContextHandler: Started o.s.j.s.ServletContextHandler@5461754c{/app/json,null,AVAILABLE,@Spark}
+17/07/20 11:59:35 INFO ContextHandler: Started o.s.j.s.ServletContextHandler@389ff0a9{/,null,AVAILABLE,@Spark}
+17/07/20 11:59:35 INFO ContextHandler: Started o.s.j.s.ServletContextHandler@6b16e0ed{/json,null,AVAILABLE,@Spark}
+17/07/20 11:59:35 INFO ContextHandler: Started o.s.j.s.ServletContextHandler@3b209570{/static,null,AVAILABLE,@Spark}
+17/07/20 11:59:35 INFO ContextHandler: Started o.s.j.s.ServletContextHandler@64b45c4d{/app/kill,null,AVAILABLE,@Spark}
+17/07/20 11:59:35 INFO ContextHandler: Started o.s.j.s.ServletContextHandler@23e9e2ca{/driver/kill,null,AVAILABLE,@Spark}
+17/07/20 11:59:35 INFO ServerConnector: Started Spark@43be3034{HTTP/1.1}{0.0.0.0:8080}
+17/07/20 11:59:35 INFO Server: Started @1546ms
+17/07/20 11:59:35 INFO Utils: Successfully started service 'MasterUI' on port 8080.
+17/07/20 11:59:35 INFO MasterWebUI: Bound MasterWebUI to 0.0.0.0, and started at http://100.96.2.4:8080
+17/07/20 11:59:35 INFO Server: jetty-9.2.z-SNAPSHOT
+17/07/20 11:59:35 INFO ContextHandler: Started o.s.j.s.ServletContextHandler@e72329f{/,null,AVAILABLE}
+17/07/20 11:59:35 INFO ServerConnector: Started ServerConnector@4e460780{HTTP/1.1}{spark-master:6066}
+17/07/20 11:59:35 INFO Server: Started @1565ms
+17/07/20 11:59:35 INFO Utils: Successfully started service on port 6066.
+17/07/20 11:59:35 INFO StandaloneRestServer: Started REST server for submitting applications on port 6066
+17/07/20 11:59:35 INFO ContextHandler: Started o.s.j.s.ServletContextHandler@799f0a37{/metrics/master/json,null,AVAILABLE,@Spark}
+17/07/20 11:59:35 INFO ContextHandler: Started o.s.j.s.ServletContextHandler@269d94f4{/metrics/applications/json,null,AVAILABLE,@Spark}
+17/07/20 11:59:35 INFO Master: I have been elected leader! New state: ALIVE
 ```
 
 Once the master is started, we'll want to check the Spark WebUI. In order to access the Spark WebUI, we will deploy a [specialized proxy](https://github.com/aseigneurin/spark-ui-proxy). This proxy is neccessary to access worker logs from the Spark UI.
@@ -119,18 +135,18 @@ Once the master is started, we'll want to check the Spark WebUI. In order to acc
 Deploy the proxy controller with [`examples/spark/spark-ui-proxy-controller.yaml`](spark-ui-proxy-controller.yaml):
 
 ```console
-$ kubectl create -f examples/spark/spark-ui-proxy-controller.yaml
+$ kubectl create -f spark-ui-proxy-controller.yaml
 replicationcontroller "spark-ui-proxy-controller" created
 ```
 
 We'll also need a corresponding Loadbalanced service for our Spark Proxy [`examples/spark/spark-ui-proxy-service.yaml`](spark-ui-proxy-service.yaml):
 
 ```console
-$ kubectl create -f examples/spark/spark-ui-proxy-service.yaml
+$ kubectl create -f spark-ui-proxy-service.yaml
 service "spark-ui-proxy" created
 ```
 
-After creating the service, you should eventually get a loadbalanced endpoint:
+After creating the service, you should eventually get a loadbalanced endpoint (It may take a couple of minutes):
 
 ```console
 $ kubectl get svc spark-ui-proxy -o wide
@@ -162,7 +178,7 @@ Use the [`examples/spark/spark-worker-controller.yaml`](spark-worker-controller.
 [replication controller](../../docs/user-guide/replication-controller.md) that manages the worker pods.
 
 ```console
-$ kubectl create -f examples/spark/spark-worker-controller.yaml
+$ kubectl create -f spark-worker-controller.yaml
 replicationcontroller "spark-worker-controller" created
 ```
 
@@ -198,14 +214,14 @@ for more details.
 Deploy Zeppelin:
 
 ```console
-$ kubectl create -f examples/spark/zeppelin-controller.yaml
+$ kubectl create -f zeppelin-controller.yaml
 replicationcontroller "zeppelin-controller" created
 ```
 
 And the corresponding service:
 
 ```console
-$ kubectl create -f examples/spark/zeppelin-service.yaml
+$ kubectl create -f zeppelin-service.yaml
 service "zeppelin" created
 ```
 
