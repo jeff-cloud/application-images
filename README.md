@@ -14,9 +14,8 @@ any applications that require custom built Docker images.
 
 Each directory should include:
 * a top-level README describing the contents
-* a Makefile with a `make push` rule that will push to
-  `gcr.io/google_containers` (it has to be something that @k8s-oncall can push
-  to).
+* a Makefile with a `make push` rule that will push to `databeanau` 
+  (Originally to `gcr.io/google_containers`, and please have it update to whatever repository it fits).
 
 ## Contributing
 
